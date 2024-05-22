@@ -1,4 +1,5 @@
 from main import BooksCollector
+import pytest
 
 # класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
 # обязательно указывать префикс Test
@@ -21,4 +22,81 @@ class TestBooksCollector:
         assert len(collector.get_books_rating()) == 2
 
     # напиши свои тесты ниже
-    # чтобы тесты были независимыми в каждом из них создавай отдельный экземпляр класса BooksCollector()
+    # чтобы тесты были независимыми, в каждом из них создавай отдельный экземпляр класса BooksCollector()
+
+    def test_add_new_book_added_book_has_no_genre(self):
+        name_book = 'Мертвые души'
+        collector = BooksCollector()
+        collector.add_new_book(name_book)
+        assert collector.books_genre[name_book] == ''
+
+    def test_add_new_book_get_name_new_added_book_from_books_genre(self):
+        name_book = 'Гарри Поттер и узник Азкабана'
+        collector = BooksCollector()
+        collector.add_new_book(name_book)
+        assert list(collector.books_genre.keys())[-1] == 'Гарри Поттер и узник Азкабана'
+
+    def test_get_books_with_specific_genre_get_list_of_books_with_genre_is_fantastic(self):
+        collector = BooksCollector()
+        names_book = ['Тайна третьей планеты', 'И грянул гром']
+        set_genre = 'Фантастика'
+        for book_name in names_book:
+            collector.add_new_book(book_name)
+            collector.set_book_genre(book_name, set_genre)
+        assert len(collector.get_books_with_specific_genre('Фантастика')) == 2
+
+    @pytest.mark.parametrize('name,genre', [
+        ['Лабиринт отражений', 'Фантастика'],
+        ['Сияние', 'Ужасы'],
+        ['Внутри убийцы', 'Детективы'],
+        ['Сага о Винланде', 'Мультфильмы'],
+        ['Ревизор', 'Комедии']
+    ])
+    def test_set_book_genre_new_book_has_genre(self, name, genre):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        collector.set_book_genre(name, genre)
+        assert collector.books_genre[name] == genre
+
+    def test_get_book_genre_book_has_genre_is_detective(self):
+        book_name = 'Внутри убийцы'
+        book_genre = 'Детективы'
+        collector = BooksCollector()
+        collector.add_new_book(book_name)
+        collector.set_book_genre(book_name, book_genre)
+        assert collector.get_book_genre(book_name) == 'Детективы'
+
+    def test_get_books_for_children_add_two_books_len_equals_two(self):
+        collector = BooksCollector()
+        collector.books_genre['Незнайка на Луне'] = 'Мультфильмы'
+        collector.books_genre['Летучий корабль'] = 'Мультфильмы'
+        assert len(collector.get_books_for_children()) == 2
+
+    def test_get_books_genre_add_book_and_books_genre_not_empty(self):
+        collector = BooksCollector()
+        collector.add_new_book('Лабиринт отражений')
+        assert collector.get_books_genre() != {}
+
+    def test_add_book_in_favorites_get_name_added_book_from_favorites(self):
+        book_name = 'Лабиринт отражений'
+        collector = BooksCollector()
+        collector.add_new_book(book_name)
+        collector.add_book_in_favorites(book_name)
+        assert collector.favorites[-1] == 'Лабиринт отражений'
+
+    def test_delete_book_from_favorites_is_empty_after_delete_book(self):
+        book_name = 'Лабиринт отражений'
+        collector = BooksCollector()
+        collector.add_new_book(book_name)
+        collector.add_book_in_favorites(book_name)
+        collector.delete_book_from_favorites(book_name)
+        assert collector.favorites == []
+
+    def test_get_list_of_favorites_books_is_not_empty_after_added_books(self):
+        books_name = ['Ведьмак', 'Волкодав', 'Мастер и Маргарита']
+        collector = BooksCollector()
+        for name in books_name:
+            collector.add_new_book(name)
+            collector.add_book_in_favorites(name)
+        assert collector.get_list_of_favorites_books() != []
+
